@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-ser = serial.Serial(port='COM13', baudrate=230400, timeout=1.0)
+ser = serial.Serial(port='COM13', baudrate=230400, timeout=5.0)
 # ser.set_buffer_size(rx_size = 25000, tx_size = 12800)
-ser.set_buffer_size(rx_size = 100000, tx_size = 12800)
+ser.set_buffer_size(rx_size = 500000, tx_size = 12800)
 
 print(ser.name)
 ser.flushInput()
@@ -30,7 +30,7 @@ while(True):
     image = np.asarray(list(resp))
 
     cols = 324
-#    rows = 324
+#    rows = 320
     rows = int(np.floor(len(image)/cols))
     print(rows)
     image = image[0:rows*cols]

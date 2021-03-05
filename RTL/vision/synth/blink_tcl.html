@@ -40,62 +40,14 @@ if (a)
 <BODY>
 
 <DIV id="content" onclick="hideTocList()"><PRE>
-<A name="pn210304003451"></A><B><U><big>pn210304003451</big></U></B>
-#Start recording tcl command: 3/4/2021 00:29:29
+<A name="pn210305030021"></A><B><U><big>pn210305030021</big></U></B>
+#Start recording tcl command: 3/4/2021 19:05:16
 #Project Location: F:/whathisface/UPduino-v3.0/RTL/vision/synth; Project name: blink
 prj_open "F:/whathisface/UPduino-v3.0/RTL/vision/synth/blink.rdf"
-file copy -force -- "F:/whathisface/UPduino-v3.0/RTL/vision/synth/upduino.pdc" "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1"
-prj_add_source "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1/upduino.pdc"
-prj_enable_source "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1/upduino.pdc"
+prj_disable_source "F:/whathisface/UPduino-v3.0/RTL/vision/src/blink_himax.sv"
+file copy -force -- "F:/whathisface/UPduino-v3.0/RTL/vision/src/blink-himax.v" "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1"
+prj_add_source "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1/blink-himax.v"
 prj_run Synthesis -impl impl_1
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_run Synthesis -impl impl_1
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_save 
-prj_close
-#Stop recording: 3/4/2021 00:34:51
-
-
-
-<A name="pn210304004238"></A><B><U><big>pn210304004238</big></U></B>
-#Start recording tcl command: 3/4/2021 00:35:47
-#Project Location: F:/whathisface/UPduino-v3.0/RTL/vision/synth; Project name: blink
-prj_open "F:/whathisface/UPduino-v3.0/RTL/vision/synth/blink.rdf"
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_run Map -impl impl_1
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_close
-#Stop recording: 3/4/2021 00:42:38
-
-
-
-<A name="pn210304011230"></A><B><U><big>pn210304011230</big></U></B>
-#Start recording tcl command: 3/4/2021 00:42:40
-#Project Location: F:/whathisface/UPduino-v3.0/RTL/vision/synth; Project name: blink
-prj_open "F:/whathisface/UPduino-v3.0/RTL/vision/synth/blink.rdf"
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
-prj_run Map -impl impl_1
-prj_run PAR -impl impl_1
-prj_run Export -impl impl_1
 prj_run Map -impl impl_1
 prj_run PAR -impl impl_1
 prj_run Export -impl impl_1
@@ -104,9 +56,43 @@ prj_run Synthesis -impl impl_1
 prj_run Map -impl impl_1
 prj_run PAR -impl impl_1
 prj_run Export -impl impl_1
+prj_disable_source "F:/whathisface/UPduino-v3.0/RTL/vision/src/ram256x16_himax.mem"
+file copy -force -- "F:/whathisface/UPduino-v3.0/RTL/vision/src/ram256x16_himax_324x324.mem" "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1"
+prj_add_source "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1/ram256x16_himax_324x324.mem"
+prj_run Synthesis -impl impl_1
+prj_run Map -impl impl_1
+prj_run PAR -impl impl_1
+prj_run Export -impl impl_1
+prj_run Synthesis -impl impl_1
+prj_run Map -impl impl_1
+prj_run PAR -impl impl_1
+prj_run Export -impl impl_1
+prj_run Synthesis -impl impl_1
+prj_run Map -impl impl_1
+prj_run PAR -impl impl_1
+prj_run Export -impl impl_1
+prj_run Synthesis -impl impl_1
+prj_run Map -impl impl_1
+prj_run PAR -impl impl_1
+prj_run Export -impl impl_1
+prj_run Synthesis -impl impl_1
+prj_run Map -impl impl_1
+prj_run PAR -impl impl_1
+prj_run Export -impl impl_1
+prj_disable_source "F:/whathisface/UPduino-v3.0/RTL/vision/synth/source/impl_1/blink-himax.v"
+prj_enable_source "F:/whathisface/UPduino-v3.0/RTL/vision/src/blink_himax.sv"
+prj_run Synthesis -impl impl_1
+prj_run Map -impl impl_1
+prj_run PAR -impl impl_1
+prj_run Export -impl impl_1
+prj_run Export -impl impl_1
+prj_run Export -impl impl_1
+prj_run Export -impl impl_1
+prj_run Export -impl impl_1
+prj_run Export -impl impl_1
 prj_save 
 prj_close
-#Stop recording: 3/4/2021 01:12:30
+#Stop recording: 3/5/2021 03:00:21
 
 
 
@@ -114,9 +100,7 @@ prj_close
 
 <DIV id="toc" class="radiant"><span onmousemove="showTocList()">Contents</span>
 <UL id="toc_list">
-<LI><A href=#pn210304003451>pn210304003451</A></LI>
-<LI><A href=#pn210304004238>pn210304004238</A></LI>
-<LI><A href=#pn210304011230>pn210304011230</A></LI>
+<LI><A href=#pn210305030021>pn210305030021</A></LI>
 </UL>
 </DIV>
 

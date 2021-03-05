@@ -37,30 +37,29 @@ For a license to use on non-tinyVision.ai Inc. hardware, please contact license@
 * Module:: Top level jumping off point to get pixel data from the camera
 */
 
-
 module blink_himax ( 
     // Host interface
-    input  wire        uart_rx   ,
-    output logic       uart_tx   ,
+    input          uart_rx   ,
+    output        uart_tx   ,
     // GPIO
-    output logic [2:0] gpio      ,
-    output logic       host_intr ,
+    output  [2:0] gpio      ,
+    output        host_intr ,
     // SPI master to control imager and IMU
-    inout  wire        i2c_scl   ,
-    inout  wire        i2c_sda   ,
-    output logic       sensor_clk, // Must be ~6MHz
+    inout          i2c_scl   ,
+    inout          i2c_sda   ,
+    output        sensor_clk, // Must be ~6MHz
     // Image sensor data port
-    input  wire        px_clk    ,
-    input  wire        px_fv     ,
-    input  wire        px_lv     ,
+    input          px_clk    ,
+    input          px_fv     ,
+    input          px_lv     ,
     // Himax is setup for 4 bit output. Note that the bits are reversed for Himax to help with routing!
-    input  wire  [7:0] pxd       ,
-    output logic       sensor_led,
-    output logic       led_red   ,
-    output logic       led_green ,
-    output logic       led_blue,
-	output logic	   enable,
-	output logic 	   ir_led
+    input    [7:0] pxd       ,
+    output        sensor_led,
+    output        led_red   ,
+    output        led_green ,
+    output        led_blue,
+    output 	   enable,
+    output  	   ir_led
 );
 
 
@@ -69,33 +68,33 @@ module blink_himax (
 	
     //Parameters
     //parameter UART_PERIOD = 'd104; // To get to 115200 Baud
-    parameter UART_PERIOD = 'd52;  // To get to 230400 Baud
+    parameter UART_PERIOD = 16'd52;  // To get to 230400 Baud
     //parameter UART_PERIOD = 'd26;  // To get to 460800 Baud
     //parameter UART_PERIOD = 'd13;    // To get to 921600 Baud
 
     parameter NUM_HIMAX_CMDS = 7'd80; // Parameterized so sims can be run faster
 
-    logic red, green, blue;
+    reg red, green, blue;
 
     // UART to communicate with the world
-    logic [7:0] uart_rx_data, uart_tx_data;
-    logic       uart_rx_valid, uart_tx_valid;
-    logic       uart_tx_empty;
-    logic       load_fifo    ;
+    wire [7:0] uart_rx_data, uart_tx_data;
+    wire       uart_rx_valid, uart_tx_valid;
+    wire       uart_tx_empty;
+    wire       load_fifo    ;
 
     // FIFO to hold image data
-    logic       fifo_in_ready, fifo_out_ready;
-    logic [7:0] o_fifo_data  ;
-    logic       o_fifo_valid, o_fifo_ready;
+    wire       fifo_in_ready, fifo_out_ready;
+    wire [7:0] o_fifo_data  ;
+    wire       o_fifo_valid, o_fifo_ready;
 
     // Image related signals
-    logic [ 7:0] pixel_data ;
-    logic        pixel_valid, pixel_ready;
-    logic        pixel_eof  ; // Signals end of frame
-    logic [16:0] num_pixels ;
+    wire [ 7:0] pixel_data ;
+    wire        pixel_valid, pixel_ready;
+    wire        pixel_eof  ; // Signals end of frame
+    wire [16:0] num_pixels ;
 
-    logic clk  ;
-    logic rst_n, rst;
+    wire clk  ;
+    wire rst_n, rst;
 
     // Internal oscillator: 12MHz
     HSOSC #(.CLKHF_DIV("0b10")) u_hfosc (
@@ -109,10 +108,10 @@ module blink_himax (
     assign rst = ~rst_n;
 	
      assign enable = 1'b1;				// enable on-board LDO's
-	 assign ir_led = 1'b1;
+     assign ir_led = 1'b1;
 	 
     // Clcok divider for various things as needed
-    logic [27:0] clk_divider;
+    reg [27:0] clk_divider;
     always @(posedge clk) begin
         if (rst)
             clk_divider <= 0;
@@ -122,8 +121,8 @@ module blink_himax (
 
 
     // State machine to deal with initialization and frame capture/readout
-    logic        init, init_done;
-    logic [19:0] timer    ; // Set this to be very low during simulations!
+    reg        init, init_done;
+    reg [19:0] timer    ; // Set this to be very low during simulations!
 
     enum {
         S_POR,          // Wait for POR time for the Flash/SRAM and other devices
@@ -136,12 +135,14 @@ module blink_himax (
         S_XXX           // Default trap
     } s_state, s_next;
 
-    always_ff @(posedge clk) begin
+//    always_ff @(posedge clk) begin
+    always @(posedge clk) begin
         if(rst) s_state <= S_POR;
         else s_state <= s_next;
     end
 
-    always_comb begin
+//    always_comb begin
+    always @(posedge clk) begin
         s_next = S_XXX;
         case (s_state)
             S_POR          : if (&timer) s_next = S_PROG; else s_next = S_POR;
@@ -151,7 +152,7 @@ module blink_himax (
             S_WAIT_FRAME   : if (pixel_eof) s_next = S_WAIT_UART_TX; else s_next = S_WAIT_FRAME;
             S_WAIT_UART_TX : 
                 begin 
-                    if (num_pixels == '0) 
+                    if (num_pixels == 0) 
                         s_next = S_WAIT_UART; 
                     else 
                         if (~uart_tx_empty)
@@ -164,18 +165,19 @@ module blink_himax (
         endcase // s_state
     end
 
-    always_ff @(posedge clk) begin
+//    always_ff @(posedge clk) begin
+    always @(posedge clk) begin
         if(rst) begin
-            timer <= '0;
-            init  <= '0;
+            timer <= 0;
+            init  <= 0;
         end else begin
-            init       <= '0;
+            init       <= 0;
 
             case (s_state)
-                S_POR       : timer <= timer + 'd1;
-                S_PROG      : init <= '1;
-                S_WAIT_INIT : timer <= '0;
-                S_WAIT_UART : timer <= '0;
+                S_POR       : timer <= timer + 1;
+                S_PROG      : init <= 1;
+                S_WAIT_INIT : timer <= 0;
+                S_WAIT_UART : timer <= 0;
                 S_WAIT_FRAME   : ; //timer <= timer + 'd1; // Uncomment if testing the UART incrementing pattern
                 S_WAIT_UART_TX, S_PAUSE_UART : ;
                 S_XXX          : ;
@@ -189,14 +191,15 @@ module blink_himax (
     // The sensor LED signal is an input to the Himax camera and kicks off a frame capture
     // Potentially keep the sensor_led signal high until the entire frame is read out (EOF) to
     // sync up the IR LED with exposure.
-    always_ff @(posedge clk) begin
+//    always_ff @(posedge clk) begin
+    always @(posedge clk) begin
         if(rst) begin
             sensor_led <= 0;
         end else begin
             if (uart_rx_valid)
-                sensor_led <= '1;
+                sensor_led <= 1;
             else if (pixel_valid)
-                sensor_led <= '0;
+                sensor_led <= 0;
         end
     end
 
@@ -204,7 +207,7 @@ module blink_himax (
     // Himax camera needs initialization at startup over I2C. The register settings are
     // stored in a mem file as: <address> <data> on separate lines.
     //================================================================================
-    logic w_scl_out, w_sda_out;
+    wire w_scl_out, w_sda_out;
     lsc_i2cm_himax #(.NUM_CMD(NUM_HIMAX_CMDS), .INIT_FILE("ram256x16_himax_324x324_dim_maxfps.mem")) u_lsc_i2cm_himax (
         .clk      (clk      ),
         .init     (init     ),
@@ -300,14 +303,15 @@ IOL_B
 
 
 
-    always_ff @(posedge px_clk) begin
+//    always_ff @(posedge px_clk) begin
+    always @(posedge px_clk) begin
         pxd_d    <= pxd_p;
         cam_data <= {pxd_d, pxd_p};
 //		cam_data <= pxd_d;
         hsync    <= px_lv_p;
         vsync    <= px_fv_p;
-        if (px_lv_p == '0)
-            pxl_cnt <= '0;
+        if (px_lv_p == 0)
+            pxl_cnt <= 0;
         else
             pxl_cnt <= pxl_cnt + 'd1;
     end
@@ -333,41 +337,44 @@ IOL_B
     );
 
     // Dont hold off the FIFO, ever!
-    assign pixel_ready = '1;
+    assign pixel_ready = 1;
 
     // Detect an end of frame by detecting a falling VSYNC.
-    logic [1:0] vsync_d;
-    logic eof;
-    always_ff @(posedge px_clk)
+    reg [1:0] vsync_d;
+    wire eof;
+//    always_ff @(posedge px_clk)
+    always @(posedge px_clk)
         vsync_d <= {vsync_d[0], vsync};
 
     assign eof = vsync_d[1] & ~vsync_d[0];
 
     // Demet the EOF to the clk domain & rising edge detect it
-    logic [1:0] eof_d;
-    always_ff @(posedge clk)
+    reg [1:0] eof_d;
+//    always_ff @(posedge clk)
+    always @(posedge clk)
         eof_d <= {eof_d[0], eof};
 
     assign pixel_eof = ~eof_d[1] & eof_d[0];
 
     // Allow the FIFO under UART command and stop it once the EOF is reached
-    always_ff @(posedge clk) begin
+//    always_ff @(posedge clk) begin
+    always @(posedge clk) begin
         if(rst) begin
-            load_fifo <= '0;
+            load_fifo <= 0;
         end else begin
             if ((s_state == S_WAIT_UART) & uart_rx_valid)
-                load_fifo <= '1;
+                load_fifo <= 1;
             else if ((s_state == S_WAIT_FRAME) & eof)
-                load_fifo <= '0;
+                load_fifo <= 0;
         end
     end
 
     // RAM to buffer pixel data
-    logic [16:0] ram_addr   ;
-    logic        ram_cs, ram_wr_en;
-    logic ram_rd_valid;
-    logic [ 7:0] ram_wr_data;
-    logic [ 7:0] ram_rd_data;
+    wire [16:0] ram_addr   ;
+    wire        ram_cs, ram_wr_en;
+    wire ram_rd_valid;
+    wire [ 7:0] ram_wr_data;
+    wire [ 7:0] ram_rd_data;
     ice40_spram_128kx8 i_ice40_spram_128kx8 (
         .clk    (clk        ),
         .rst    (rst        ),
@@ -383,10 +390,11 @@ IOL_B
     assign ram_cs    = (pixel_valid & (s_state == S_WAIT_FRAME) ) | (uart_tx_empty & (s_state == S_WAIT_UART_TX));
     assign ram_wr_data = pixel_data;
 
-    always_ff @(posedge clk) begin
+//    always_ff @(posedge clk) begin
+    always @(posedge clk) begin
         if(rst) begin
-            ram_addr <= '0;
-            num_pixels <= '0;
+            ram_addr <= 0;
+            num_pixels <= 0;
         end else begin
 
             // RAM has a 1 cycle read delay 
@@ -398,11 +406,11 @@ IOL_B
 
             case (s_state)
                 S_POR, S_PROG, S_WAIT_INIT :;
-                S_WAIT_UART  : ram_addr <= '0;
+                S_WAIT_UART  : ram_addr <= 0;
                 S_WAIT_FRAME : begin
                     num_pixels <= num_pixels + pixel_valid; // Count up the pixels
                     if (eof)
-                        ram_addr <= '0;
+                        ram_addr <= 0;
                     else
                         ram_addr <= ram_addr + pixel_valid;
                 end
@@ -477,8 +485,8 @@ IOL_B
     // LED ports have to have a special IO driver
     //================================================================================
     // LED is too bright, make this dim enough to not hurt eyes!
-    logic duty_cycle;
-    assign duty_cycle = '1;//= &clk_divider[1:0];
+    wire duty_cycle;
+    assign duty_cycle = 1;//= &clk_divider[1:0];
 
     RGB u_led_driver (
         .CURREN  (1'b1     ),
@@ -490,6 +498,7 @@ IOL_B
         .RGB1    (led_green),
         .RGB2    (led_blue )
     );
+
     defparam u_led_driver.CURRENT_MODE = "1" ;
     defparam u_led_driver.RGB0_CURRENT = "0b000001";
     defparam u_led_driver.RGB1_CURRENT = "0b000001";
@@ -502,10 +511,11 @@ IOL_B
     assign gpio[1]   = uart_tx;
     assign gpio[2]   = uart_rx_valid;
 
-    always_ff @(posedge clk) begin
+//    always_ff @(posedge clk) begin
+   always @(posedge clk) begin
         if(rst) begin
-            red   <= '0;
-            green <= '0;
+            red   <= 0;
+            green <= 0;
         end else
         if (uart_rx_valid) begin
             red   <= (uart_rx_data == "r") ? 1'b1 : 1'b0;

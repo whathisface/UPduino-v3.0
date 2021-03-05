@@ -178,7 +178,7 @@ parameter [2:0]
         s_next = S_XXX;
 		
         case (s_state)
-            S_INIT_WAIT : if (timer == "21'1b000000000000000000001") s_next = S_PROG; else s_next = S_INIT_WAIT;
+            S_INIT_WAIT : if (timer == "21'b000000000000000000001") s_next = S_PROG; else s_next = S_INIT_WAIT;
             S_PROG      : s_next = S_WAIT;
             S_WAIT      : if (init_done) s_next = S_DONE; else s_next = S_WAIT;
             S_DONE      : s_next = S_DONE;
@@ -307,7 +307,7 @@ parameter [2:0]
 
 //	wire uRdy;
 /* lightweight uartTx for debug ---  */
-/*	UartTx #( .BAUD_PERIOD(16'd103) ) u_uart_tx (		// 207 @ 24 MHz
+/*	UartTx #( .BAUD_PERIOD(16'd103) ) u_uart_tx (		// 207 @ 24 MHz
 	.clk(w_clk),
 	.rst(rst),
 //	.go(1'b1),
